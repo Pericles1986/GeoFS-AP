@@ -165,7 +165,7 @@ vs_preverror = 0
     vs_pitch = 0
     ampli_high = 10
     ampli_low = 5
-    ampli_land = 20
+    ampli_land = 10
 function control_vspeed() {
     vspeed = geofs.animation.values.verticalSpeed
 
@@ -481,7 +481,7 @@ function control_gs() {
 function control_land() {
     height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
         pl.innerHTML = "LAND " + Math.round(height)
-        if (!geofs.animation.values.groundContact && height < 50 + 10) {
+        if (!geofs.animation.values.groundContact && height < 30 + 10) {
             tgt_vs = 0
 
                 controls.throttle = 0
