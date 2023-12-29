@@ -165,7 +165,7 @@ vs_preverror = 0
     vs_pitch = 0
     ampli_high = 10
     ampli_low = 5
-    ampli_land = 10
+    ampli_land = 8
 function control_vspeed() {
     vspeed = geofs.animation.values.verticalSpeed
 
