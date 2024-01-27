@@ -166,10 +166,17 @@ vs_preverror = 0
     ampli_high = 10
     ampli_low = 5
     ampli_land = 8
+old_vspeed=0
+k_v_acc=1
 function control_vspeed() {
-    vspeed = geofs.animation.values.verticalSpeed
+    	vspeed = geofs.animation.values.verticalSpeed
 
-        vs_error = tgt_vs - vspeed
+	v_acc=vspeed-old_vspeed
+	
+	old_vspeed=vspeed
+        
+	
+	vs_error = tgt_vs - vspeed
 
         ampli = 1
 
@@ -193,8 +200,10 @@ function control_vspeed() {
         vsCD = vsKd * (vs_error - vs_prev_error)
 
         vsCI = Math.max(-30, Math.min(30, vsCI))
-		
-        vs_pitch = vsCP + vsCI + vsCD
+	
+	vsCA=	-v_acc*vs_error*k_v_acc
+        
+	vs_pitch = vsCP + vsCI + vsCD + vsCA
         cCI = pitch
         control_pitch(vs_pitch)
         vs_prev_error = vs_error
