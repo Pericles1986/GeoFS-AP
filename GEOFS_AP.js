@@ -206,7 +206,7 @@ function control_vspeed() {
 
         vsCP = vs_error * vsKp
         if (AP_Land)  {vsCI += Math.max(0,ampli * vsKi * Math.sign(vs_error))}
-		else
+	else
 		{vsCI += ampli * vsKi * Math.sign(vs_error)}
         vsCD = vsKd * (vs_error - vs_prev_error)
 
