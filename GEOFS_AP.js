@@ -60,7 +60,7 @@ var AP_Pitch = false
     var cKdg = 0.1
 
     //nav
-    var nKp = 10
+    var nKp = .0010
 
     var tgt_g = 1
     var gKp = .01
@@ -459,7 +459,7 @@ function control_nav() {
                 }
         }
         //brg=geofs.animation.values.NAV1Bearing
-        delta = geofs.animation.values.NAVCourseDeviation
+        delta = geofs.animation.values.NAVCourseDeviation*geofs.animation.values.NAVDistance
         //delta=brg-obs
         nCI += delta * nki
         nCi = Math.max(-10, Math.min(10, nCI))
