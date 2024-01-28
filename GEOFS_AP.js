@@ -774,7 +774,7 @@ function toggle_VS() {
             pvs.style.background = "";
     } else {
 
-        vsCI = pitch
+        vsCI = -pitch
             pvs.style.background = "green";
         pcl.style.background = "";
         pg.style.background = "";
