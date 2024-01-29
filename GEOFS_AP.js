@@ -462,18 +462,18 @@ function control_nav() {
         delta = geofs.animation.values.NAVCourseDeviation*geofs.animation.values.NAVDistance
         //delta=brg-obs
         nCI += delta * nki
-        nCi = Math.max(-10, Math.min(10, nCI))
+        nCI = Math.max(-20, Math.min(20, nCI))
         delta = Math.max(-30, Math.min(30, nKp * delta))
-
+	pnav.innerHTML= "NAV " + delta + obs + nCI;
         control_heading(delta + obs + nCI)
 }
 
-gskp = 20
-    gski = .1
+gskp = .002
+    gski = .000003
     gsCI = 0
     vs100 = 0
 function control_gs() {
-    gs_dev = geofs.animation.values.NAVGlideAngleDeviation
+    gs_dev = geofs.animation.values.NAVGlideAngleDeviation*geofs.animation.values.NAVDistance
         gsCI += gs_dev * gski
 
         gsCI = Math.max(-10, Math.min(10, gsCI))
