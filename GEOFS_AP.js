@@ -445,7 +445,7 @@ function find_ILS() {
 }
 nav = null
     nav_error = 0
-    nki = 0.0
+    nki = 0.00001
     nCI = 0
 function control_nav() {
     freq = geofs.animation.values.NAV1Frequency
