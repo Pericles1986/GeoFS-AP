@@ -464,7 +464,7 @@ function control_nav() {
         nCI += delta * nki
         nCI = Math.max(-20, Math.min(20, nCI))
         delta = Math.max(-30, Math.min(30, nKp * delta))
-	pnav.innerHTML= "NAV " + delta + obs + nCI;
+	pnav.innerHTML= "NAV " + (delta + obs + nCI);
         control_heading(delta + obs + nCI)
 }
 
