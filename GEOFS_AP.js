@@ -469,7 +469,7 @@ function control_nav() {
 }
 
 gskp = .002
-    gski = .000003
+    gski = 0.000008
     gsCI = 0
     vs100 = 0
 function control_gs() {
