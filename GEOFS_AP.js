@@ -202,6 +202,7 @@ function control_vspeed() {
         }
         if (AP_Land) {
             ampli = ampli_land
+			vsCA=0
         }
 
         vsCP = vs_error * vsKp
@@ -470,7 +471,7 @@ function control_nav() {
 gskp = .002
     gski = 0.000008
     gsCI = 0
-    vs100 = 0
+    
 function control_gs() {
     gs_dev = geofs.animation.values.NAVGlideAngleDeviation*geofs.animation.values.NAVDistance
         gsCI += gs_dev * gski
@@ -483,16 +484,16 @@ function control_gs() {
         pgs.innerHTML = "GS " + Math.round(100 * (gs_pitch)) / 100
         pl.innerHTML = "LAND " + Math.round(geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet)
         if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 100 + 9 && speed > 35) {
-            vs100 = vspeed
+		
 
-                tgt_vs = -500
-                toggle_GS()
-                if (AP_Speed) {
-                    toggle_SPD()
-					YCI=0
-                }
-                toggle_Land()
-                console.log("LAND LAND LAND")
+			tgt_vs = -500
+			toggle_GS()
+			if (AP_Speed) {
+				toggle_SPD()
+				YCI=0
+			}
+			toggle_Land()
+			console.log("LAND LAND LAND")
         }
 
 }
@@ -511,7 +512,8 @@ function control_land() {
         }
         control_vspeed()
         if (geofs.animation.values.groundContact) {
-            if (speed > 40) {
+            rwy_track()
+			if (speed > 40) {
 
                 if (controls.airbrakes.position == 0) {
                     controls.setters.setAirbrakes.set()
