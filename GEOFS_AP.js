@@ -326,7 +326,6 @@ function control_speed(asked_speed) {
 error_hdg = 0
     turning_roll = 50
 function control_heading(hdg) {
-    current_hdg = geofs.animation.values.heading360
 
         error_hdg = hdg - current_hdg
 
@@ -490,6 +489,7 @@ function control_gs() {
                 toggle_GS()
                 if (AP_Speed) {
                     toggle_SPD()
+					YCI=0
                 }
                 toggle_Land()
                 console.log("LAND LAND LAND")
@@ -500,10 +500,14 @@ function control_gs() {
 function control_land() {
     height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
         pl.innerHTML = "LAND " + Math.round(height)
+
         if (!geofs.animation.values.groundContact && height < 30 + 10) {
             tgt_vs = 0
 
-                controls.throttle = 0
+			controls.throttle = 0
+			
+			rwy_track()
+			
         }
         control_vspeed()
         if (geofs.animation.values.groundContact) {
@@ -529,8 +533,22 @@ function control_land() {
 
 }
 
+ykp=.01
+yki=0.001
+YCI=0
+function rwy_track(){
+	hdg_error=(obs-current_hdg)
+	
+	YCI+=yki*hdg_error
+	YCP=hdg_error*ykp
+	
+	controls.yaw=YCI+YCP
+	
+	
+} 
+
 pitch = 0
-    dpitch = 0
+dpitch = 0
 
 function AP_Pitch_roll() {
 
@@ -551,6 +569,8 @@ function AP_Pitch_roll() {
             tgt_spd = geofs.autopilot.values.speed
             //tgt_vs=geofs.autopilot.values.verticalSpeed
             tgt_hdg = geofs.autopilot.values.course
+			current_hdg = geofs.animation.values.heading360
+
             //
             vspeed = geofs.animation.values.verticalSpeed
             vspeed_kt = vspeed / 6076.12 * 60
@@ -692,16 +712,17 @@ div.appendChild(pgs);
 div.appendChild(pl);
 
 pap.onmousedown = toggle_AP
-    pg.onmousedown = toggle_G
-    pp.onmousedown = toggle_Pitch
-    palt.onmousedown = toggle_Altitude
-    pvs.onmousedown = toggle_VS
-    pcl.onmousedown = toggle_Climb
-    prol.onmousedown = toggle_Roll
-    phdg.onmousedown = toggle_HDG
-    pnav.onmousedown = toggle_NAV
-    pgs.onmousedown = toggle_GS
-    pspd.onmousedown = toggle_SPD
+pg.onmousedown = toggle_G
+pp.onmousedown = toggle_Pitch
+palt.onmousedown = toggle_Altitude
+pvs.onmousedown = toggle_VS
+pcl.onmousedown = toggle_Climb
+prol.onmousedown = toggle_Roll
+phdg.onmousedown = toggle_HDG
+pnav.onmousedown = toggle_NAV
+pgs.onmousedown = toggle_GS
+pspd.onmousedown = toggle_SPD
+pl.onmousedown = toggle_Land
 
 function toggle_AP() {
     if (AP_is_ON) {
