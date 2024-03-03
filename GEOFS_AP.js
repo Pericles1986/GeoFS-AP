@@ -411,7 +411,7 @@ function control_pitch(ask_pitch) {
             }
             minelev = -1
             if (takeoff || AP_Land) {
-                minelev = -.20
+                minelev = -.80
             }
             cmd_pitch = Math.max(minelev, Math.min(1, pCP_smooth + pCI + pCD))
 
