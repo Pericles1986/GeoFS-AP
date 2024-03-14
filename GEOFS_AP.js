@@ -171,7 +171,7 @@ k_v_acc=1
 k_v_acc_limit=10
 
 function control_vspeed() {
-    	vspeed = geofs.animation.values.verticalSpeed
+	vspeed = geofs.animation.values.verticalSpeed
 
 	v_acc=vspeed-old_vspeed
 	
@@ -183,30 +183,30 @@ function control_vspeed() {
 	v_acc_limit=vs_error*k_v_acc_limit
 	vsCA=0
 
-        ampli = 1
+	ampli = 1
 
-        height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
+	height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
 
-        if (height > 500) {
-            if (Math.abs(vs_error) > 1000) {
-                ampli = ampli_high
-            } else if (Math.abs(vs_error) > 500) {
-                ampli = ampli_low
-            }
-		if(Math.abs(v_acc)>Math.abs(v_acc_limit)){
-	
-			vsCA=	(v_acc+Math.sign(v_acc_limit))*k_v_acc
-	        	
-			
+	if (height > 500) {
+		if (Math.abs(vs_error) > 1000) {
+			ampli = ampli_high
+		} else if (Math.abs(vs_error) > 150) {
+			ampli = ampli_low
 		}
-        }
-        if (AP_Land) {
-            ampli = ampli_land
-			vsCA=0
-        }
+	// if(Math.abs(v_acc)>Math.abs(v_acc_limit)){
 
-        vsCP = vs_error * vsKp
-        if (AP_Land)  {vsCI += Math.max(-.01,ampli * vsKi * Math.sign(vs_error))}
+		// vsCA=	(v_acc+Math.sign(v_acc_limit))*k_v_acc
+			
+		
+	// }
+	}
+	if (AP_Land) {
+		ampli = ampli_land
+		vsCA=0
+	}
+
+	vsCP = vs_error * vsKp
+	if (AP_Land)  {vsCI += Math.max(-.01,ampli * vsKi * Math.sign(vs_error))}
         //if (AP_Land)  {vsCI += Math.max(0,ampli * vsKi * (vs_error))}
 	else
 		{vsCI += ampli * vsKi * Math.sign(vs_error)}
@@ -215,7 +215,7 @@ function control_vspeed() {
         vsCI = Math.max(-30, Math.min(30, vsCI))
 	
 
-	vs_pitch = vsCP + vsCI + vsCD + vsCA
+		vs_pitch = vsCP + vsCI + vsCD + vsCA
         cCI = pitch
         control_pitch(vs_pitch)
         vs_prev_error = vs_error
@@ -819,7 +819,7 @@ function toggle_Climb() {
     } else {
 
         cCI = controls.pitch
-            pcl.style.background = "green";
+		pcl.style.background = "green";
         pvs.style.background = "";
 
         AP_Vspeed = false;
@@ -881,10 +881,12 @@ function toggle_GS() {
         pgs.style.background = "green";
         pvs.style.background = "";
         palt.style.background = "";
+		pcl.style.background = "";
 
         AP_GS = true;
+		AP_Climb = false;
         AP_Altitude = false
-            AP_Vspeed = false;
+		AP_Vspeed = false;
 
     }
 
@@ -917,6 +919,6 @@ function toggle_Land() {
 }
 
 pub = document.getElementsByClassName("geofs-adbanner")
-    pub[0].style.display = "none"
-    apctl = document.getElementsByClassName("geofs-autopilot-controls")[0]
-    apctl.style.display = "block"
+pub[0].style.display = "none"
+apctl = document.getElementsByClassName("geofs-autopilot-controls")[0]
+apctl.style.display = "block"
