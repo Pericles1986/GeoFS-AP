@@ -567,7 +567,12 @@ function AP_Pitch_roll() {
             //roll_angle = geofs.animation.values.aroll
             pitch = geofs.animation.values.atilt
             dpitch = pitch - prev_pitch
-            pg.innerHTML = "G " + Math.round(100 * (gload)) / 100
+            angle_aoa=geofs.aircraft.instance.angleOfAttackDeg
+	    
+	    pg.innerHTML = "G " + Math.round(100 * (gload)) / 100
+	    
+	    aoa.innerHTML = "AOA " + Math.round(10 * (angle_aoa)) / 10
+	    
             tgt_alt = geofs.autopilot.values.altitude
             tgt_spd = geofs.autopilot.values.speed
             //tgt_vs=geofs.autopilot.values.verticalSpeed
@@ -677,6 +682,7 @@ var phdg = document.createElement("p");
 var pnav = document.createElement("p");
 var pgs = document.createElement("p");
 var pl = document.createElement("p");
+var aoa = document.createElement("p");
 
 pap.innerHTML = "AP";
 pg.innerHTML = "G";
@@ -690,6 +696,7 @@ pnav.innerHTML = "NAV";
 pgs.innerHTML = "GS";
 pl.innerHTML = "LAND";
 pspd.innerHTML = "SPEED";
+aoa.innerHTML = "AOA";
 
 var div = document.createElement("div");
 div.style.width = "50px";
@@ -713,6 +720,7 @@ div.appendChild(phdg);
 div.appendChild(pnav);
 div.appendChild(pgs);
 div.appendChild(pl);
+div.appendChild(aoa);
 
 pap.onmousedown = toggle_AP
 pg.onmousedown = toggle_G
