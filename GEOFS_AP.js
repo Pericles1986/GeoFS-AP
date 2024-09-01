@@ -30,9 +30,9 @@ var AP_Pitch = false
 
     //pitch
     var pKp = 0.2
-    var pKi = 0.01
+    var pKi = 0.005
     var pKd =  - .2
-    var pKg = .1
+    var pKg = .25
     var pKdg = .1
 
     //roll
@@ -266,7 +266,7 @@ function control_altitude(asked_altitude) {
 cCI = 0
 function climb() {
 
-    if (alti_error > 0 && terr > 15) {
+    if (alti_error > 0 && terr > 10) {
 
         tgt_vs = 1000
 
@@ -274,7 +274,19 @@ function climb() {
             control_vspeed()
             pcl.style.background = "orange";
         cCI = pitch
-    } else {
+    } 
+    else if (alti_error < 0 && terr < -10) {
+
+        tgt_vs = -1000
+
+            tprev_err = 0
+            control_vspeed()
+            pcl.style.background = "orange";
+        cCI = pitch
+    } 	
+	
+	
+	else {
         pcl.style.background = "green";
         //if (Math.sign(cCI*alti_error)<0){cCI=0}
         cCP = -terr * cKp
@@ -366,66 +378,71 @@ pCI = 0
     pCP_smooth = 0
     pKs = 100
     cmd_pitch = 0
+	pCG=0
+	
 function control_pitch(ask_pitch) {
 
     if (speed > 100) {
         takeoff = geofs.animation.values.groundContact || !AP_Land && (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet) < 50
-            if (takeoff) {
-                perr = 10 + pitch // limit pitch on takeoff to avoid tail strike
-            } else {
-                perr = ask_pitch + pitch
-            }
+		if (takeoff) {
+			perr = 10 + pitch // limit pitch on takeoff to avoid tail strike
+		} else {
+			perr = ask_pitch + pitch
+		}
 
-            pCP = pKp * perr
-            if (Math.abs(pCP - pCP_smooth) > .01) {
-                pCP_smooth += Math.sign(pCP - pCP_smooth) / pKs
+		pCP = pKp * perr
+		if (Math.abs(pCP - pCP_smooth) > .01) {
+			pCP_smooth += Math.sign(pCP - pCP_smooth) / pKs
 
-            } else {
-                pCP_smooth = pCP
+		} else {
+			pCP_smooth = pCP
 
-            }
-            pCP_smooth = Math.max(-1, Math.min(1, pCP_smooth))
+		}
+		pCP_smooth = Math.max(-1, Math.min(1, pCP_smooth))
 
-            pCI += pprev_err * pKi
-            pCD = (pprev_err - perr) * pKd
+		
+		pCD = (pprev_err - perr) * pKd
 
-            pCI = Math.max(-1, pCI)
-            pCI = Math.min(1, pCI)
+	
 
-            pprev_err = perr
-            if (geofs.animation.values.groundContact) {
-                pCI = 0
-            }
+		pprev_err = perr
+		if (geofs.animation.values.groundContact) {
+			pCI = 0
+		}
 
-            if (gload > maxg) {
-                pglim *= .95
-            } else if (gload < ming) {
-                pglim *= .95
-            } else {
-                if (pglim > .98) {
-                    pglim = 1
-                } else {
-                    pglim /= .95
-                }
+		if (gload > maxg) {
+			pCG=-pKg*(gload-maxg)
+		} else if (gload < ming) {
+			pCG=-pKg*(gload-ming)
+		} else {
+			pCG=0
 
-            }
-            minelev = -1
-            if (takeoff || AP_Land) {
-                minelev = -.80
-            }
-            cmd_pitch = Math.max(minelev, Math.min(1, pCP_smooth + pCI + pCD))
+		}
+		
+		pCI += pprev_err * pKi 
+		pCI = Math.max(-1, pCI)
+		pCI = Math.min(1, pCI)	
+		
+		pCI +=  pCG
+		
+		minelev = -1
+		if (takeoff || AP_Land) {
+			minelev = -.80
+		}
 
-            current_pitch = controls.rawPitch
+		cmd_pitch = Math.max(minelev, Math.min(1, pCP_smooth + pCI + pCD ))
 
-            controls.rawPitch = cmd_pitch * pglim
+		current_pitch = controls.rawPitch
 
-            if (Math.abs(dpitch) > dpitch_limit) {
-                controls.rawPitch *= .95
-            }
+		controls.rawPitch = cmd_pitch 
+
+		if (Math.abs(dpitch) > dpitch_limit) {
+			controls.rawPitch *= .95
+		}
 
     }
 
-    pp.innerHTML = "PITCH " + Math.round(100 * (cmd_pitch * pglim)) / 100
+    pp.innerHTML = "PITCH " + Math.round(100 * (cmd_pitch))  + "%"
 
 }
 last_checked_freq = 0
