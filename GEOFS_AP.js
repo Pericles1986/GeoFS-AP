@@ -1,79 +1,79 @@
 var AP_Pitch = false
-    var AP_Roll = false
-    var AP_Speed = false
-    var AP_Vspeed = false
-    var AP_Altitude = false
-    var AP_Climb = false
-    var AP_G = false
-    var AP_HDG = false
-    var AP_NAV = false
-    var AP_GS = false
-    var AP_Land = false
+var AP_Roll = false
+var AP_Speed = false
+var AP_Vspeed = false
+var AP_Altitude = false
+var AP_Climb = false
+var AP_G = false
+var AP_HDG = false
+var AP_NAV = false
+var AP_GS = false
+var AP_Land = false
 
-    var AP_is_ON = false
+var AP_is_ON = false
 
-    var tgt_pitch = 20
-    var tgt_roll = 0
-    var tgt_spd = 400 // kt
-    var tgt_vs = 2000
+var tgt_pitch = 20
+var tgt_roll = 0
+var tgt_spd = 400 // kt
+var tgt_vs = 2000
 
-    var tgt_alt = 33000
-    var tgt_hdg = 0180
+var tgt_alt = 33000
+var tgt_hdg = 0180
 
-    var maxg = 2
-    var ming = 0
+var maxg = 2
+var ming = 0
 
-    //thrust
-    var tKp = 0.11
-    var tKi = 0.0005
-    var tKd = .0
+//thrust
+var tKp = 0.11
+var tKi = 0.0005
+var tKd = .0
 
-    //pitch
-    var pKp = 0.2
-    var pKi = 0.005
-    var pKd =  - .2
-    var pKg = .25
-    var pKdg = .1
+//pitch
+var pKp = 0.2
+var pKi = 0.005
+var pKd =  - .2
+var pKg = .25
+var pKdg = .1
 
-    //roll
-    var Kp = 0.01
-    var Ki = 0.0000
-    var Kd =  - .20
+//roll
+var Kp = 0.01
+var Ki = 0.0000
+var Kd =  - .20
 
-    //vertical speed
-    var vsKp = 0.000
-    var vsKi = 0.01
-    var vsKd = -0.000
-    var vsKg = .1
-    var vsKdg = .1
+//vertical speed
+var vsKp = 0.000
+var vsKi = 0.01
+var vsKd = -0.000
+var vsKg = .1
+var vsKdg = .1
 
-    //Altitude
-    var aKp = 100
-    var aKi = 0.1
-    var aKd = 10
+//Altitude
+var aKp = 100
+var aKi = 0.1
+var aKd = 10
 
-    //climb
-    var cKp = 0.5
-    var cKi = .004
-    var cKd = -0.0
-    var cKg = 0.1
-    var cKdg = 0.1
+//climb
+var cKp = 0.5
+var cKi = .004
+var cKd = -0.0
+var cKg = 0.1
+var cKdg = 0.1
 
-    //nav
-    var nKp = .0010
+//nav
+var nKp = .0010
 
-    var tgt_g = 1
-    var gKp = .01
-    prev_gload = 1
-    dgload_limit = .1
-    gKp_max = .01
-    gKp_min = .0000000000001
+var tgt_g = 1
+var gKp = .01
+prev_gload = 1
+dgload_limit = .1
+gKp_max = .01
+gKp_min = .0000000000001
 
-    gload = 1
-    prev_gload = 1
-    g_error = 0
-    dgload = 0
-    dpitch_limit = .3
+gload = 1
+prev_gload = 1
+g_error = 0
+dgload = 0
+dpitch_limit = .3
 function control_load_factor(asked_LF) {
 
     gload = geofs.animation.values.loadFactor
@@ -264,6 +264,10 @@ function control_altitude(asked_altitude) {
 
 }
 cCI = 0
+var min_pitch = -25;
+var max_pitch = 25;
+
+
 function climb() {
 
     if (alti_error > 0 && terr > 10) {
@@ -274,6 +278,9 @@ function climb() {
             control_vspeed()
             pcl.style.background = "orange";
         cCI = pitch
+		min_pitch = -pitch;
+		max_pitch = 25;
+		
     } 
     else if (alti_error < 0 && terr < -10) {
 
@@ -282,7 +289,10 @@ function climb() {
             tprev_err = 0
             control_vspeed()
             pcl.style.background = "orange";
-        cCI = pitch
+        cCI = -pitch
+		min_pitch = -25;
+		max_pitch = -pitch;
+		
     } 	
 	
 	
@@ -300,8 +310,10 @@ function climb() {
 
             ask_pitch = cCP + cCI + cCD
 
-            ask_pitch = Math.max(ask_pitch, -25)
-            ask_pitch = Math.min(ask_pitch, 25)
+            ask_pitch = Math.max(ask_pitch, min_pitch)
+            ask_pitch = Math.min(ask_pitch, max_pitch)
+			
+			
             control_pitch(ask_pitch)
 
     }
