@@ -297,9 +297,11 @@ function climb() {
 	
 	
 	else {
-        pcl.style.background = "green";
-        //if (Math.sign(cCI*alti_error)<0){cCI=0}
-        cCP = -terr * cKp
+
+	    min_pitch = -25;
+	    pcl.style.background = "green";
+	    //if (Math.sign(cCI*alti_error)<0){cCI=0}
+    	    cCP = -terr * cKp
             cCI -= terr * cKi
             cCD = (terr - tprev_err) * cKd
 
