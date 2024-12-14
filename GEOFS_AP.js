@@ -118,7 +118,7 @@ CI = 0
 function control_roll(asked_roll) {
 
     roll = geofs.animation.values.aroll
-
+	prol.innerHTML = "ROLL " + Math.round(asked_roll*10)/10;
         err = asked_roll + roll
 
         CP = Kp * err
@@ -179,7 +179,9 @@ function control_vspeed() {
         
 	
 	vs_error = tgt_vs - vspeed
-   
+	
+	pvs.innerHTML = "VS " + Math.round( (tgt_vs)) 
+	
 	v_acc_limit=vs_error*k_v_acc_limit
 	vsCA=0
 
@@ -873,7 +875,7 @@ function toggle_Roll() {
     } else {
         prol.style.background = "green";
         phdg.style.background = "";
-
+		tgt_roll=0
         AP_HDG = false;
         AP_Roll = true;
     }
