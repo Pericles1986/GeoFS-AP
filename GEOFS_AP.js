@@ -299,9 +299,10 @@ function climb() {
 	
 	
 	else {
-
-	    min_pitch = -25;
-	    pcl.style.background = "green";
+		if (terr>10  && alti_error < 0 ){  // trop haut et trop lent
+				min_pitch = -25;
+			}
+		pcl.style.background = "green";
 	    //if (Math.sign(cCI*alti_error)<0){cCI=0}
     	    cCP = -terr * cKp
             cCI -= terr * cKi
@@ -458,7 +459,7 @@ function control_pitch(ask_pitch) {
 
     }
 
-    pp.innerHTML = "PITCH " + Math.round(100 * (cmd_pitch))  + "%"
+    pp.innerHTML = "PITCH " +Math.round(10 * (ask_pitch))/10 +"|"+ Math.round(100 * (cmd_pitch))  + "%"
 
 }
 last_checked_freq = 0
