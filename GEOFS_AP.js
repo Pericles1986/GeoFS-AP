@@ -405,6 +405,7 @@ function control_pitch(ask_pitch) {
 			perr = 10 + pitch // limit pitch on takeoff to avoid tail strike
 		} else {
 			perr = ask_pitch + pitch
+			perr=Math.max(-2,Math.min(2,perr))
 		}
 
 		pCP = pKp * perr
