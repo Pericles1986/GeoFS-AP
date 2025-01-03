@@ -169,7 +169,7 @@ vs_preverror = 0
 old_vspeed=0
 k_v_acc=1
 k_v_acc_limit=10
-
+altitude=0
 function control_vspeed() {
 	vspeed = geofs.animation.values.verticalSpeed
 
@@ -330,7 +330,7 @@ tCI = 0
     speed = 0
 function control_speed(asked_speed) {
 
-    terr = asked_speed - speed
+    terr = asked_speed - kias
 
         if (AP_Climb) {
             if (alti_error > 0) {
@@ -587,7 +587,7 @@ function rwy_track(){
 
 pitch = 0
 dpitch = 0
-
+kias=0
 function AP_Pitch_roll() {
 
     var myInterval = setInterval(function () {
@@ -606,8 +606,10 @@ function AP_Pitch_roll() {
 	    
 	    pg.innerHTML = "G " + Math.round(100 * (gload)) / 100
 	    
-	    aoa.innerHTML = "AOA " + Math.round(10 * (angle_aoa)) / 10
 	    
+		aoa.innerHTML = "AOA " + Math.round(10 * (angle_aoa)) / 10
+	    
+		
             tgt_alt = geofs.autopilot.values.altitude
             tgt_spd = geofs.autopilot.values.speed
             //tgt_vs=geofs.autopilot.values.verticalSpeed
@@ -620,7 +622,11 @@ function AP_Pitch_roll() {
             Gnd_speed = geofs.animation.values.groundSpeedKnt
             rel_wind_speed = geofs.animation.values.windSpeed * Math.cos(geofs.animation.values.relativeWind * DEGREES_TO_RAD)
             speed = Math.sqrt(vspeed_kt ** 2 + (Gnd_speed - rel_wind_speed) ** 2)
-
+//		 KTAS = KIAS *(1+2/100*alt/1000)
+			
+			kias=speed/(1+2/100*altitude/1000)
+			pspd.innerHTML="SPEED " + Math.round(kias)
+			
             if (AP_G) {
                 control_load_factor(tgt_g)
             }
