@@ -590,7 +590,7 @@ dpitch = 0
 kias=0
 function AP_Pitch_roll() {
 
-    var myInterval = setInterval(function () {
+    var myInterval = window.setInterval(function () {
         //vspeed = geofs.animation.values.verticalSpeed
         //
         gload = geofs.animation.values.loadFactor
