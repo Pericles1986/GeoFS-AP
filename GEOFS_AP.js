@@ -229,7 +229,7 @@ alti_error = 0
 
 function control_altitude(asked_altitude) {
 
-    altitude = geofs.animation.values.altitude
+    
         alti_error = asked_altitude - altitude
 
         if (Math.abs(alti_error) > 1000) {
@@ -397,7 +397,7 @@ pCI = 0
     cmd_pitch = 0
 	pCG=0
 	
-function control_pitch(ask_pitch) {
+function control_pitch_old(ask_pitch) {
 
     if (speed > 100) {
         takeoff = geofs.animation.values.groundContact || !AP_Land && (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet) < 50
@@ -463,6 +463,77 @@ function control_pitch(ask_pitch) {
     pp.innerHTML = "PITCH " +Math.round(10 * (ask_pitch))/10 +"|"+ Math.round(100 * (cmd_pitch))  + "%"
 
 }
+
+pKi2=0.05
+pKd2=.02
+vpitch_limit=3 // 3 deg per second max 
+vpitch_limit_catch=.5 // .5 deg per second max 
+
+function control_pitch(ask_pitch) {
+	takeoff = geofs.animation.values.groundContact || !AP_Land && (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet) < 50
+	if (takeoff) {
+		pitch_err = 10 + pitch // limit pitch on takeoff to avoid tail strike
+		//pitch_err>0 tow low pitch, must increase
+	} else {
+		pitch_err=ask_pitch+pitch
+	}
+	
+	mach_factor=1
+	attenuation_factor=1
+	if (mach>0.5)
+	{
+		mach_factor=Math.E**(attenuation_factor*(1-mach))/Math.E**(attenuation_factor*(1-0.5))
+	}
+	
+	if (gload>maxg)
+	{
+		controls.rawPitch-=.01
+		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10 + "G"
+
+	}
+	else if (gload<ming)
+	{
+		controls.rawPitch+=.01*mach_factor
+		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10 + "G"
+
+	}
+	else if (Math.abs(vpitch/vpitch_limit)>1)
+	{
+		controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor
+		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10 + "V"
+
+	}
+	else
+	{
+		if (Math.abs(pitch_err)>2){
+			
+		controls.rawPitch+=.005*Math.sign(pitch_err)*mach_factor
+		
+		if (pitch_err*vpitch>=0)
+		{
+			controls.rawPitch+=.05*Math.sign(pitch_err)*mach_factor
+		
+		}
+		
+		
+		}
+		else
+		{
+			controls.rawPitch+=.005*pitch_err/2*mach_factor
+			if (Math.abs(vpitch)>.5)
+			{
+				controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor
+				
+			}
+		}
+		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10
+		
+
+	}
+    
+}
+
+
 last_checked_freq = 0
     thisnav = ""
 function find_ILS() {
@@ -510,64 +581,64 @@ gskp = .002
     
 function control_gs() {
     gs_dev = geofs.animation.values.NAVGlideAngleDeviation*geofs.animation.values.NAVDistance
-        gsCI += gs_dev * gski
+	gsCI += gs_dev * gski
 
-        gsCI = Math.max(-10, Math.min(10, gsCI))
+	gsCI = Math.max(-10, Math.min(10, gsCI))
 
-        gs_pitch = Math.max(-10, Math.min(10, gsCI + gskp * gs_dev))
-        vsCI = gs_pitch
-        control_pitch(gs_pitch)
-        pgs.innerHTML = "GS " + Math.round(100 * (gs_pitch)) / 100
-        pl.innerHTML = "LAND " + Math.round(geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet)
-        if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 100 + 9 && speed > 35) {
-		
+	gs_pitch = Math.max(-10, Math.min(10, gsCI + gskp * gs_dev))
+	vsCI = gs_pitch
+	control_pitch(gs_pitch)
+	pgs.innerHTML = "GS " + Math.round(100 * (gs_pitch)) / 100
+	pl.innerHTML = "LAND " + Math.round(geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet)
+	if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 100 + 9 && speed > 35) {
+	
 
-			tgt_vs = -500
-			toggle_GS()
-			if (AP_Speed) {
-				toggle_SPD()
-				YCI=0
-			}
-			toggle_Land()
-			console.log("LAND LAND LAND")
-        }
+		tgt_vs = -500
+		toggle_GS()
+		if (AP_Speed) {
+			toggle_SPD()
+			YCI=0
+		}
+		toggle_Land()
+		console.log("LAND LAND LAND")
+	}
 
 }
 
 function control_land() {
     height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
-        pl.innerHTML = "LAND " + Math.round(height)
+	pl.innerHTML = "LAND " + Math.round(height)
 
-        if (!geofs.animation.values.groundContact && height < 30 + 10) {
-            tgt_vs = 0
+	if (!geofs.animation.values.groundContact && height < 30 + 10) {
+		tgt_vs = 0
 
+		controls.throttle = 0
+		
+		rwy_track()
+		
+	}
+	control_vspeed()
+	if (geofs.animation.values.groundContact) {
+		rwy_track()
+		if (speed > 40) {
+
+			if (controls.airbrakes.position == 0) {
+				controls.setters.setAirbrakes.set()
+
+			}
+
+			if (controls.throttle > -1) {
+				controls.setters.decreaseThrottle.set()
+			}
+
+		} else {
+			controls.brakes = 1
 			controls.throttle = 0
-			
-			rwy_track()
-			
-        }
-        control_vspeed()
-        if (geofs.animation.values.groundContact) {
-            rwy_track()
-			if (speed > 40) {
-
-                if (controls.airbrakes.position == 0) {
-                    controls.setters.setAirbrakes.set()
-
-                }
-
-                if (controls.throttle > -1) {
-                    controls.setters.decreaseThrottle.set()
-                }
-
-            } else {
-                controls.brakes = 1
-                    controls.throttle = 0
-                    toggle_Land()
-                    toggle_NAV()
-                    tgt_roll = 0
-            }
-        }
+			toggle_Land()
+			toggle_NAV()
+			tgt_roll = 0
+		}
+	}
 
 }
 
@@ -588,122 +659,141 @@ function rwy_track(){
 pitch = 0
 dpitch = 0
 kias=0
+dt=0
+vpitch=0
+prev_time=geofs.animation.values.geofsTime/1000
+fpa=0 // vecteur vitesse
+alt_acq=0
 function AP_Pitch_roll() {
-
+	
     var myInterval = window.setInterval(function () {
         //vspeed = geofs.animation.values.verticalSpeed
         //
-        gload = geofs.animation.values.loadFactor
-            //vspeed_kt=vspeed/6076.12*60
-            //Gnd_speed = geofs.animation.values.groundSpeedKnt
-            //speed_vector=Math.sqrt(vspeed_kt**2+Gnd_speed**2)
-            //pitch = geofs.animation.values.atilt
-            //altitude = geofs.animation.values.altitude
-            //roll_angle = geofs.animation.values.aroll
-            pitch = geofs.animation.values.atilt
-            dpitch = pitch - prev_pitch
-            angle_aoa=geofs.aircraft.instance.angleOfAttackDeg
+		now=geofs.animation.values.geofsTime/1000 // time in seconds
+		dt=now-prev_time
+		prev_time=now
+		gload = geofs.animation.values.loadFactor
+
+
+		pitch = geofs.animation.values.atilt
+		dpitch = pitch - prev_pitch
+		vpitch=dpitch/dt
+		
+		pitch_in_1_sec=pitch+vpitch*1
+		
+		angle_aoa=geofs.aircraft.instance.angleOfAttackDeg
 	    
 	    pg.innerHTML = "G " + Math.round(100 * (gload)) / 100
 	    
 	    
-		aoa.innerHTML = "AOA " + Math.round(10 * (angle_aoa)) / 10
-	    
+		aoa.innerHTML = "AOA " + Math.round(10 * angle_aoa) / 10
+	
+	
+		tgt_alt = geofs.autopilot.values.altitude
+		tgt_spd = geofs.autopilot.values.speed
+		//tgt_vs=geofs.autopilot.values.verticalSpeed
+		tgt_hdg = geofs.autopilot.values.course
+		current_hdg = geofs.animation.values.heading360
+
+		//
+		vspeed = geofs.animation.values.verticalSpeed
+		vspeed_kt = vspeed / 6076.12 * 60
+		Gnd_speed = geofs.animation.values.groundSpeedKnt
+		rel_wind_speed = geofs.animation.values.windSpeed * Math.cos(geofs.animation.values.relativeWind * DEGREES_TO_RAD)
+		speed = Math.sqrt(vspeed_kt ** 2 + (Gnd_speed - rel_wind_speed) ** 2) // KTAS
+		fpa= Math.asin(vspeed_kt/(speed+.000001))
 		
-            tgt_alt = geofs.autopilot.values.altitude
-            tgt_spd = geofs.autopilot.values.speed
-            //tgt_vs=geofs.autopilot.values.verticalSpeed
-            tgt_hdg = geofs.autopilot.values.course
-			current_hdg = geofs.animation.values.heading360
-
-            //
-            vspeed = geofs.animation.values.verticalSpeed
-            vspeed_kt = vspeed / 6076.12 * 60
-            Gnd_speed = geofs.animation.values.groundSpeedKnt
-            rel_wind_speed = geofs.animation.values.windSpeed * Math.cos(geofs.animation.values.relativeWind * DEGREES_TO_RAD)
-            speed = Math.sqrt(vspeed_kt ** 2 + (Gnd_speed - rel_wind_speed) ** 2)
+		pfpa.innerHTML = "FPA "+Math.round(fpa*RAD_TO_DEGREES*10)/10;
+		
+		speed_ms=speed*0.514444
+		alt_acq=speed_ms**2/9.81*(1-Math.cos(fpa))*3.28084
+		
+		pacq.innerHTML = "ACQ "+Math.round(alt_acq);
+		
 //		 KTAS = KIAS *(1+2/100*alt/1000)
-			
-			kias=speed/(1+2/100*altitude/1000)
-			pspd.innerHTML="SPEED " + Math.round(kias)
-			
-            if (AP_G) {
-                control_load_factor(tgt_g)
-            }
+		altitude = geofs.animation.values.altitude
+		kias=speed/(1+2/100*altitude/1000)
+		pspd.innerHTML="SPEED " + Math.round(kias)
+		ppitch.style.top=(50-50*controls.rawPitch)+"%"
+		mach=geofs.animation.values.mach
+		
+		if (AP_G) {
+			control_load_factor(tgt_g)
+		}
 
-            //////////// SPEED ////////////
+		//////////// SPEED ////////////
 
-            if (AP_Speed) {
+		if (AP_Speed) {
 
-                control_speed(tgt_spd)
+			control_speed(tgt_spd)
 
-            }
+		}
 
-            //////////PITCH ///////////////
+		//////////PITCH ///////////////
 
-            if (AP_Pitch) {
-                control_pitch(tgt_pitch)
+		if (AP_Pitch) {
+			control_pitch(tgt_pitch)
 
-            }
+		}
 
-            /////////////////////// VERTICAL SPEED
+		/////////////////////// VERTICAL SPEED
 
-            if (AP_Vspeed) {
+		if (AP_Vspeed) {
 
-                control_vspeed()
+			control_vspeed()
 
-            }
+		}
 
-            /////////////// ALTITUDE
+		/////////////// ALTITUDE
 
-            if (AP_Altitude) {
+		if (AP_Altitude) {
 
-                control_altitude(tgt_alt)
+			control_altitude(tgt_alt)
 
-            }
+		}
 
-            //////////HEADING ///////////////
+		//////////HEADING ///////////////
 
-            if (AP_Roll) {
+		if (AP_Roll) {
 
-                control_roll(tgt_roll)
+			control_roll(tgt_roll)
 
-            }
+		}
 
-            //////////HEADING ///////////////
+		//////////HEADING ///////////////
 
-            if (AP_HDG) {
+		if (AP_HDG) {
 
-                control_heading(tgt_hdg)
+			control_heading(tgt_hdg)
 
-            }
+		}
 
-            if (AP_NAV) {
+		if (AP_NAV) {
 
-                control_nav()
+			control_nav()
 
-            }
+		}
 
-            if (AP_GS) {
+		if (AP_GS) {
 
-                control_gs()
+			control_gs()
 
-            }
+		}
 
-            if (AP_Land) {
-                control_land()
-            }
+		if (AP_Land) {
+			control_land()
+		}
 
-            prev_pitch = pitch
+		prev_pitch = pitch
 
-            if (AP_is_ON == false) {
-                clearInterval(myInterval);
-                console.log('AP IS OFF')
-                pap.style.background = "";
+		if (AP_is_ON == false) {
+			clearInterval(myInterval);
+			console.log('AP IS OFF')
+			pap.style.background = "";
 
-            }
+		}
 
-    }, 100);
+    }, 100); // repeat every 100 milliseconds
 
     //controls.rawPitch
     //geofs.animation.values.atilt
@@ -724,6 +814,8 @@ var pnav = document.createElement("p");
 var pgs = document.createElement("p");
 var pl = document.createElement("p");
 var aoa = document.createElement("p");
+var pfpa = document.createElement("p");
+var pacq = document.createElement("p");
 
 pap.innerHTML = "AP";
 pg.innerHTML = "G";
@@ -738,6 +830,8 @@ pgs.innerHTML = "GS";
 pl.innerHTML = "LAND";
 pspd.innerHTML = "SPEED";
 aoa.innerHTML = "AOA";
+pfpa.innerHTML = "FPA";
+pacq.innerHTML = "ACQ";
 
 var div = document.createElement("div");
 div.style.width = "50px";
@@ -747,7 +841,25 @@ div.style.color = "white";
 //div.style.position = "absolute";
 div.style.top = "50px";
 
+
 document.body.appendChild(div);
+
+var divpitch = document.createElement("div");
+divpitch.style.width = "25px";
+divpitch.style.height = "500px";
+divpitch.style.background = "black";
+divpitch.style.color = "white";
+divpitch.style.position = "fixed";
+divpitch.style.top = "50px";
+
+
+var ppitch = document.createElement("p");
+ppitch.innerHTML="---"
+ppitch.style.position="absolute"
+divpitch.appendChild(ppitch)
+
+
+document.body.appendChild(divpitch);
 
 div.appendChild(pap);
 div.appendChild(pg);
@@ -762,6 +874,8 @@ div.appendChild(pnav);
 div.appendChild(pgs);
 div.appendChild(pl);
 div.appendChild(aoa);
+div.appendChild(pfpa);
+div.appendChild(pacq);
 
 pap.onmousedown = toggle_AP
 pg.onmousedown = toggle_G
