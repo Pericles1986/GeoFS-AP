@@ -232,7 +232,7 @@ function control_altitude(asked_altitude) {
     
         alti_error = asked_altitude - altitude
 
-        if (Math.abs(alti_error) > 1000) {
+        if (Math.abs(alti_error) > alt_acq) {
 
             if (AP_Climb) {
 
@@ -705,8 +705,8 @@ function AP_Pitch_roll() {
 		
 		pfpa.innerHTML = "FPA "+Math.round(fpa*RAD_TO_DEGREES*10)/10;
 		
-		speed_ms=speed*0.514444
-		alt_acq=speed_ms**2/9.81*(1-Math.cos(fpa))*3.28084
+		vspeed_ms=vspeed_kt*0.514444
+		alt_acq=Math.max(100,Math.abs(vspeed_ms**2/9.81/2*2*1.5*3.28084))
 		
 		pacq.innerHTML = "ACQ "+Math.round(alt_acq);
 		
