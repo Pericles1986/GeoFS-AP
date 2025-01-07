@@ -706,7 +706,7 @@ function AP_Pitch_roll() {
 		pfpa.innerHTML = "FPA "+Math.round(fpa*RAD_TO_DEGREES*10)/10;
 		
 		vspeed_ms=vspeed_kt*0.514444
-		alt_acq=Math.max(100,Math.abs(vspeed_ms**2/9.81/2*2*1.5*3.28084))
+		alt_acq=Math.max(500,Math.abs(vspeed_ms**2/9.81/2*2*1.5*3.28084))
 		
 		pacq.innerHTML = "ACQ "+Math.round(alt_acq);
 		
