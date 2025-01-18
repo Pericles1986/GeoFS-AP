@@ -48,7 +48,7 @@ var vsKg = .1
 var vsKdg = .1
 
 //Altitude
-var aKp = 200
+var aKp = 100
 var aKi = 0.1
 var aKd = 10
 
@@ -464,7 +464,7 @@ function control_pitch_old(ask_pitch) {
 
 }
 
-pKi2=1
+pKi2=0.05
 pKd2=.02
 vpitch_limit=3 // 3 deg per second max 
 vpitch_limit_catch=.5 // .5 deg per second max 
@@ -571,7 +571,7 @@ function control_nav() {
         d_delta=delta-old_delta
 		old_delta=delta
 		//delta=brg-obs
-        nCI += delta * nki
+        nCI += (delta+d_delta/dt*10) * nki
         nCI = Math.max(-20, Math.min(20, nCI))
         delta = Math.max(-30, Math.min(30, nKp * (delta+d_delta/dt*10)))
 	pnav.innerHTML= "NAV " + (delta + obs + nCI);
@@ -588,7 +588,7 @@ function control_gs() {
 	
 	d_gs_dev=(gs_dev-prev_gs_dev)
 	
-	future_dev=(gs_dev+d_gs_dev/dt*10)
+	future_dev=(gs_dev+d_gs_dev/dt*5)
 	
 	gsCI += future_dev * gski
 
@@ -625,8 +625,8 @@ function control_land() {
 		controls.throttle = 0
 		
 		rwy_track()
-		control_vspeed()
-	
+		//control_vspeed()
+		control_pitch(2+gs_pitch+2)
 	}
 	else{
 		control_pitch(2+gs_pitch)
