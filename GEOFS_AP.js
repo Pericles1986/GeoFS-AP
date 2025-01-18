@@ -507,19 +507,19 @@ function control_pitch(ask_pitch) {
 	{
 		if (Math.abs(pitch_err)>2){
 			
-		controls.rawPitch+=.005*Math.sign(pitch_err)*mach_factor
-		
-		if (pitch_err*vpitch>=0)
-		{
-			controls.rawPitch+=.05*Math.sign(pitch_err)*mach_factor
-		
-		}
+			controls.rawPitch+=.005*Math.sign(pitch_err)*mach_factor
+			
+			if (pitch_err*vpitch>=0)
+			{
+				controls.rawPitch+=.05*Math.sign(pitch_err)*mach_factor
+			
+			}
 		
 		
 		}
 		else
 		{
-			controls.rawPitch+=.005*pitch_err/2*mach_factor
+			controls.rawPitch+=.005*pitch_err/2*mach_factor*pKi2
 			if (Math.abs(vpitch)>.5)
 			{
 				controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor
@@ -554,6 +554,7 @@ nav = null
     nav_error = 0
     nki = 0.00001
     nCI = 0
+old_delta=0
 function control_nav() {
     freq = geofs.animation.values.NAV1Frequency
 
@@ -567,10 +568,12 @@ function control_nav() {
         }
         //brg=geofs.animation.values.NAV1Bearing
         delta = geofs.animation.values.NAVCourseDeviation*geofs.animation.values.NAVDistance
-        //delta=brg-obs
+        d_delta=delta-old_delta
+		old_delta=delta
+		//delta=brg-obs
         nCI += delta * nki
         nCI = Math.max(-20, Math.min(20, nCI))
-        delta = Math.max(-30, Math.min(30, nKp * delta))
+        delta = Math.max(-30, Math.min(30, nKp * (delta+d_delta/dt*10)))
 	pnav.innerHTML= "NAV " + (delta + obs + nCI);
         control_heading(delta + obs + nCI)
 }
@@ -682,6 +685,7 @@ function AP_Pitch_roll() {
         //
 		now=geofs.animation.values.geofsTime/1000 // time in seconds
 		dt=now-prev_time
+	    	dt = Math.max(dt,0.0000000000001)
 		prev_time=now
 		gload = geofs.animation.values.loadFactor
 
