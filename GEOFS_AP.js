@@ -578,14 +578,20 @@ function control_nav() {
 gskp = .002
     gski = 0.000008
     gsCI = 0
-    
+gs_pitch=0
+prev_gs_dev=0
 function control_gs() {
     gs_dev = geofs.animation.values.NAVGlideAngleDeviation*geofs.animation.values.NAVDistance
-	gsCI += gs_dev * gski
+	
+	d_gs_dev=(gs_dev-prev_gs_dev)
+	
+	future_dev=(gs_dev+d_gs_dev/dt*10)
+	
+	gsCI += future_dev * gski
 
 	gsCI = Math.max(-10, Math.min(10, gsCI))
 
-	gs_pitch = Math.max(-10, Math.min(10, gsCI + gskp * gs_dev))
+	gs_pitch = Math.max(-10, Math.min(10, gsCI + gskp * future_dev))
 	vsCI = gs_pitch
 	control_pitch(gs_pitch)
 	pgs.innerHTML = "GS " + Math.round(100 * (gs_pitch)) / 100
@@ -602,6 +608,7 @@ function control_gs() {
 		toggle_Land()
 		console.log("LAND LAND LAND")
 	}
+	prev_gs_dev=gs_dev
 
 }
 
@@ -615,9 +622,13 @@ function control_land() {
 		controls.throttle = 0
 		
 		rwy_track()
+		control_vspeed()
+	
+	}
+	else{
+		control_pitch(2+gs_pitch)
 		
 	}
-	control_vspeed()
 	if (geofs.animation.values.groundContact) {
 		rwy_track()
 		if (speed > 40) {
