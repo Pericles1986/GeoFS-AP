@@ -464,7 +464,7 @@ function control_pitch_old(ask_pitch) {
 
 }
 
-pKi2=0.05
+pKi2=1
 pKd2=.02
 vpitch_limit=3 // 3 deg per second max 
 vpitch_limit_catch=.5 // .5 deg per second max 
