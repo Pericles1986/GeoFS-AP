@@ -48,7 +48,7 @@ var vsKg = .1
 var vsKdg = .1
 
 //Altitude
-var aKp = 100
+var aKp = 200
 var aKi = 0.1
 var aKd = 10
 
