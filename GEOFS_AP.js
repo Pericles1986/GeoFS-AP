@@ -48,7 +48,7 @@ var vsKg = .1
 var vsKdg = .1
 
 //Altitude
-var aKp = 100
+var aKp = 200
 var aKi = 0.1
 var aKd = 10
 
@@ -134,38 +134,16 @@ function control_roll(asked_roll) {
 
 }
 vs_preverror = 0
-    vsCI = 0
-    vs_error = 0
-    vs_prev_error = 0
-    dvs_limit = 200 // 2000fpm de variation par seconde
-    // function control_vspeed(){
-    // vspeed = geofs.animation.values.verticalSpeed
-    // vs_error=tgt_vs-vspeed
-    // catch_limit=1
-    // if (Math.abs(vs_error)<500){catch_limit=.01}
-
-    // dvs=vspeed-vs_prev
-
-    // vsCP=vs_error*vsKp
-    // vsCI+=vs_error*vsKi
-
-    // if (Math.abs(dvs)>dvs_limit*catch_limit){
-
-    // vsCI+=.5*Math.sign(vs_error)
-    // }
-
-    // vsCI = Math.max(-60, vsCI)
-    // vsCI = Math.min(70, vsCI)
+vsCI = 0
+vs_error = 0
+vs_prev_error = 0
+dvs_limit = 200 // 2000fpm de variation par seconde
 
 
-    // control_pitch(vsCP+vsCI)
-    // pp.innerHTML="PITCH "+Math.round(100*(vsCI+vsCP))/100
-    // vs_prev=vspeed
-    // }
-    vs_pitch = 0
-    ampli_high = 10
-    ampli_low = 5
-    ampli_land = 8
+vs_pitch = 0
+ampli_high = 10
+ampli_low = 5
+ampli_land = 20
 old_vspeed=0
 k_v_acc=1
 k_v_acc_limit=10
@@ -464,7 +442,7 @@ function control_pitch_old(ask_pitch) {
 
 }
 
-pKi2=1//0.05
+pKi2=1
 pKd2=.02
 vpitch_limit=3 // 3 deg per second max 
 vpitch_limit_catch=.5 // .5 deg per second max 
@@ -488,19 +466,19 @@ function control_pitch(ask_pitch) {
 	if (gload>maxg)
 	{
 		controls.rawPitch-=.01
-		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10 + "G"
+		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "G"
 
 	}
 	else if (gload<ming)
 	{
 		controls.rawPitch+=.01*mach_factor
-		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10 + "G"
+		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "G"
 
 	}
 	else if (Math.abs(vpitch/vpitch_limit)>1)
 	{
 		controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor
-		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10 + "V"
+		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "V"
 
 	}
 	else
@@ -526,7 +504,7 @@ function control_pitch(ask_pitch) {
 				
 			}
 		}
-		pp.innerHTML = "PITCH " +Math.round(10 * vpitch)/10
+		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10
 		
 
 	}
@@ -599,7 +577,7 @@ function control_gs() {
 	control_pitch(gs_pitch)
 	pgs.innerHTML = "GS " + Math.round(100 * (gs_pitch)) / 100
 	pl.innerHTML = "LAND " + Math.round(geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet)
-	if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 100 + 9 && speed > 35) {
+	if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 50 + 9 && speed > 35) {
 	
 
 		tgt_vs = -500
@@ -617,23 +595,27 @@ function control_gs() {
 
 function control_land() {
     height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
-	pl.innerHTML = "LAND " + Math.round(height)
+	
 
-	if (!geofs.animation.values.groundContact && height < 30 + 10) {
+	if (!geofs.animation.values.groundContact && height < 15 + 10) {
+		pl.innerHTML = "LAND " + Math.round(height)+ " FLARE"
 		tgt_vs = 0
 
 		controls.throttle = 0
 		
 		rwy_track()
-		//control_vspeed()
-		control_pitch(2+gs_pitch+2)
+		control_vspeed()
+		//control_pitch(5)
 	}
-	else{
-		control_pitch(2+gs_pitch)
+	// else{
+		// control_pitch(gs_pitch+2)
 		
-	}
+	// }
+	// control_vspeed()
 	if (geofs.animation.values.groundContact) {
+		pl.innerHTML = "LAND " + Math.round(height)+ " ROUT"
 		rwy_track()
+		control_pitch(2)
 		if (speed > 40) {
 
 			if (controls.airbrakes.position == 0) {
