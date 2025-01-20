@@ -148,7 +148,9 @@ old_vspeed=0
 k_v_acc=1
 k_v_acc_limit=10
 altitude=0
-function control_vspeed() {
+future_vspeed=0
+old_vacc=0
+function control_vspeed_old() {
 	vspeed = geofs.animation.values.verticalSpeed
 
 	v_acc=vspeed-old_vspeed
@@ -200,6 +202,49 @@ function control_vspeed() {
         control_pitch(vs_pitch)
         vs_prev_error = vs_error
         pp.innerHTML = "PITCH " + Math.round(100 * (vs_pitch)) / 100
+}
+
+vc=2000
+ac=500
+
+function control_vspeed() {
+	pvs.innerHTML = "VS " + Math.round( (tgt_vs)) 
+	vspeed = geofs.animation.values.verticalSpeed
+	v_acc=(vspeed-old_vspeed)/dt
+	old_vspeed=vspeed
+	v_jerk=(v_acc-old_vacc)/dt
+	old_vacc=v_acc
+	future_vspeed=vspeed+v_acc/dt*4
+	vs_error = tgt_vs - vspeed
+	ampli_vs=1
+	
+	if (Math.abs(vs_error)>vc){
+		required_acc=ac*Math.sign(vs_error)
+	}
+	else{
+		required_acc=ac*vs_error/vc
+		
+		ampli_vs=Math.abs(vs_error/vc)
+	}
+	
+	acc_error=required_acc-v_acc
+	
+	
+	// if (Math.sign(required_acc*v_acc)<0 && Math.abs(vs_error)>300){
+		// ampli_vs=3
+	// }
+	
+	controls.rawPitch+= Math.sign(acc_error)*.005*ampli_vs 
+	
+	if (Math.abs(vs_error)>vc && Math.sign(vs_error*v_acc)<0){
+		
+		controls.rawPitch+=0.000001*vs_error
+	
+		pvs.innerHTML = "VS " + Math.round( (tgt_vs)) +"W" 
+
+	}
+	
+	//-0.05*Math.sign(v_acc*vs_error) 
 }
 
 alti_error = 0
@@ -615,7 +660,7 @@ function control_land() {
 	if (geofs.animation.values.groundContact) {
 		pl.innerHTML = "LAND " + Math.round(height)+ " ROUT"
 		rwy_track()
-		control_pitch(2)
+		control_pitch(0)
 		if (speed > 40) {
 
 			if (controls.airbrakes.position == 0) {
