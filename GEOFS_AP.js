@@ -206,7 +206,9 @@ function control_vspeed_old() {
 
 vc=2000
 ac=500
-
+tgtjk=2000
+ampli_vs=.0005
+damp=.00000001
 function control_vspeed() {
 	pvs.innerHTML = "VS " + Math.round( (tgt_vs)) 
 	vspeed = geofs.animation.values.verticalSpeed
@@ -214,35 +216,21 @@ function control_vspeed() {
 	old_vspeed=vspeed
 	v_jerk=(v_acc-old_vacc)/dt
 	old_vacc=v_acc
-	future_vspeed=vspeed+v_acc/dt*4
-	vs_error = tgt_vs - vspeed
-	ampli_vs=1
+	future_vspeed=vspeed+v_acc/dt*0
+	vs_error = tgt_vs - future_vspeed
 	
-	if (Math.abs(vs_error)>vc){
-		required_acc=ac*Math.sign(vs_error)
-	}
-	else{
-		required_acc=ac*vs_error/vc
+	
+	required_acc=Math.max(-500,Math.min(500,vs_error*vs_error/500*Math.sign(vs_error)))
 		
-		ampli_vs=Math.abs(vs_error/vc)
-	}
-	
 	acc_error=required_acc-v_acc
 	
 	
-	// if (Math.sign(required_acc*v_acc)<0 && Math.abs(vs_error)>300){
-		// ampli_vs=3
-	// }
+	controls.rawPitch+= (tgtjk* Math.sign(acc_error)-(v_jerk))*Math.abs(acc_error/500)*.005*ampli_vs*mach_factor //-v_acc*damp
 	
-	controls.rawPitch+= Math.sign(acc_error)*.005*ampli_vs 
+	//controls.rawPitch+=vs_error/kvwindup
 	
-	if (Math.abs(vs_error)>vc && Math.sign(vs_error*v_acc)<0){
-		
-		controls.rawPitch+=0.000001*vs_error
 	
-		pvs.innerHTML = "VS " + Math.round( (tgt_vs)) +"W" 
-
-	}
+	
 	
 	//-0.05*Math.sign(v_acc*vs_error) 
 }
@@ -501,13 +489,7 @@ function control_pitch(ask_pitch) {
 		pitch_err=ask_pitch+pitch
 	}
 	
-	mach_factor=1
-	attenuation_factor=1
-	if (mach>0.5)
-	{
-		mach_factor=Math.E**(attenuation_factor*(1-mach))/Math.E**(attenuation_factor*(1-0.5))
-	}
-	
+
 	if (gload>maxg)
 	{
 		controls.rawPitch-=.01
@@ -622,7 +604,7 @@ function control_gs() {
 	control_pitch(gs_pitch)
 	pgs.innerHTML = "GS " + Math.round(100 * (gs_pitch)) / 100
 	pl.innerHTML = "LAND " + Math.round(geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet)
-	if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 50 + 9 && speed > 35) {
+	if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 100 + 9 && speed > 35) {
 	
 
 		tgt_vs = -500
@@ -642,21 +624,21 @@ function control_land() {
     height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
 	
 
-	if (!geofs.animation.values.groundContact && height < 15 + 10) {
+	if (!geofs.animation.values.groundContact && height < 40 + 10) {
 		pl.innerHTML = "LAND " + Math.round(height)+ " FLARE"
 		tgt_vs = 0
 
 		controls.throttle = 0
 		
 		rwy_track()
-		control_vspeed()
+		// control_vspeed()
 		//control_pitch(5)
 	}
 	// else{
 		// control_pitch(gs_pitch+2)
 		
 	// }
-	// control_vspeed()
+	 control_vspeed()
 	if (geofs.animation.values.groundContact) {
 		pl.innerHTML = "LAND " + Math.round(height)+ " ROUT"
 		rwy_track()
@@ -705,6 +687,9 @@ vpitch=0
 prev_time=geofs.animation.values.geofsTime/1000
 fpa=0 // vecteur vitesse
 alt_acq=0
+mach_factor=1
+attenuation_factor=1
+
 function AP_Pitch_roll() {
 	
     var myInterval = window.setInterval(function () {
@@ -715,6 +700,16 @@ function AP_Pitch_roll() {
 	    	dt = Math.max(dt,0.0000000000001)
 		prev_time=now
 		gload = geofs.animation.values.loadFactor
+		mach=geofs.animation.values.mach
+		
+		if (mach>0.5)
+		{
+			mach_factor=Math.E**(attenuation_factor*(1-mach))/Math.E**(attenuation_factor*(1-0.5))
+		}
+		
+
+
+
 
 
 		pitch = geofs.animation.values.atilt
@@ -757,7 +752,6 @@ function AP_Pitch_roll() {
 		kias=speed/(1+2/100*altitude/1000)
 		pspd.innerHTML="SPEED " + Math.round(kias)
 		ppitch.style.top=(50-50*controls.rawPitch)+"%"
-		mach=geofs.animation.values.mach
 		
 		if (AP_G) {
 			control_load_factor(tgt_g)
