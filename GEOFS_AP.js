@@ -155,7 +155,7 @@ function control_vspeed_old() {
 
 	v_acc=vspeed-old_vspeed
 	
-	old_vspeed=vspeed
+	
         
 	
 	vs_error = tgt_vs - vspeed
@@ -779,7 +779,7 @@ function AP_Pitch_roll() {
 			control_vspeed()
 
 		}
-
+		old_vspeed=vspeed
 		/////////////// ALTITUDE
 
 		if (AP_Altitude) {
