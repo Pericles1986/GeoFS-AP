@@ -217,6 +217,12 @@ function control_vspeed() {
 	v_jerk=(v_acc-old_vacc)/dt
 	old_vacc=v_acc
 	future_vspeed=vspeed+v_acc/dt*0
+	if (Math.abs(vs_error)>500 )
+	{
+		future_vspeed=vspeed+v_acc/dt*.01
+
+	}
+	
 	vs_error = tgt_vs - future_vspeed
 	
 	
@@ -224,9 +230,14 @@ function control_vspeed() {
 		
 	acc_error=required_acc-v_acc
 	
-	
+		
 	controls.rawPitch+= (tgtjk* Math.sign(acc_error)-(v_jerk))*Math.abs(acc_error/500)*.005*ampli_vs*mach_factor //-v_acc*damp
-	
+	// if (Math.abs(vs_error)>550 && Math.sign(vs_error*v_acc)>0)
+	// {
+		// controls.rawPitch+=0.01*Math.sign(v_acc)*(1+Math.abs(vs_error/550)/50)*mach_factor
+			// pvs.innerHTML = "VS " + Math.round( (tgt_vs)) +"*"
+
+	// }
 	//controls.rawPitch+=vs_error/kvwindup
 	
 	
