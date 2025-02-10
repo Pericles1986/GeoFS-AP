@@ -231,10 +231,19 @@ function control_vspeed() {
 	acc_error=required_acc-v_acc
 	
 		
-	controls.rawPitch+= (tgtjk* Math.sign(acc_error)-(v_jerk))*Math.abs(acc_error/500)*.005*ampli_vs*mach_factor //-v_acc*damp
-	// if (Math.abs(vs_error)>550 && Math.sign(vs_error*v_acc)>0)
+	controls.rawPitch+= (tgtjk* Math.sign(acc_error)-(v_jerk))*Math.abs(acc_error/500)*.005*ampli_vs*mach_factor 
+	
+	if (Math.abs(acc_error)>500){
+		
+		controls.rawPitch+=.001*Math.sign(acc_error)*mach_factor*Math.abs(acc_error)/500
+		pvs.innerHTML = "VS " + Math.round( (tgt_vs)) +"A"
+		
+	}
+	
+	//-v_acc*damp
+	// if (Math.abs(vs_error)>550 )//&& Math.sign(vs_error*v_acc)<0)
 	// {
-		// controls.rawPitch+=0.01*Math.sign(v_acc)*(1+Math.abs(vs_error/550)/50)*mach_factor
+		// controls.rawPitch+=0.001*Math.sign(vs_error)*mach_factor
 			// pvs.innerHTML = "VS " + Math.round( (tgt_vs)) +"*"
 
 	// }
@@ -276,14 +285,14 @@ function control_altitude(asked_altitude) {
             if (AP_Climb) {
                 toggle_Climb()
             }
-            if (AP_Vspeed) {
+            if (!AP_Vspeed) {
                 toggle_VS()
             }
 
             //ask_vs=1000*Math.atan(alti_error/aKp)/(Math.PI/2)
             tgt_vs = 1000 * alti_error / aKp //*Math.abs(alti_error)/aKp
-                tgt_vs = Math.max(-2000, Math.min(2000, tgt_vs))
-                control_vspeed()
+			tgt_vs = Math.max(-2000, Math.min(2000, tgt_vs))
+			//control_vspeed()
         }
 
 }
@@ -625,6 +634,7 @@ function control_gs() {
 			YCI=0
 		}
 		toggle_Land()
+		toggle_VS()
 		console.log("LAND LAND LAND")
 	}
 	prev_gs_dev=gs_dev
@@ -649,7 +659,7 @@ function control_land() {
 		// control_pitch(gs_pitch+2)
 		
 	// }
-	 control_vspeed()
+	// control_vspeed()
 	if (geofs.animation.values.groundContact) {
 		pl.innerHTML = "LAND " + Math.round(height)+ " ROUT"
 		rwy_track()
