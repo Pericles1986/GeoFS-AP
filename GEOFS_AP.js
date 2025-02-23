@@ -624,10 +624,10 @@ function control_gs() {
 	control_pitch(gs_pitch)
 	pgs.innerHTML = "GS " + Math.round(100 * (gs_pitch)) / 100
 	pl.innerHTML = "LAND " + Math.round(geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet)
-	if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 100 + 9 && speed > 35) {
+	if (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet < 50 + 9 && speed > 35) {
 	
 
-		tgt_vs = -500
+		tgt_vs = -speed
 		toggle_GS()
 		if (AP_Speed) {
 			toggle_SPD()
@@ -645,7 +645,7 @@ function control_land() {
     height = geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet
 	
 
-	if (!geofs.animation.values.groundContact && height < 40 + 10) {
+	if (!geofs.animation.values.groundContact && height < 20 + 10) {
 		pl.innerHTML = "LAND " + Math.round(height)+ " FLARE"
 		tgt_vs = 0
 
@@ -663,6 +663,7 @@ function control_land() {
 	if (geofs.animation.values.groundContact) {
 		pl.innerHTML = "LAND " + Math.round(height)+ " ROUT"
 		rwy_track()
+		if (AP_Vspeed){toggle_VS()}
 		control_pitch(0)
 		if (speed > 40) {
 
@@ -1020,7 +1021,7 @@ function toggle_VS() {
     } else {
 
         vsCI = -pitch
-            pvs.style.background = "green";
+		pvs.style.background = "green";
         pcl.style.background = "";
         pg.style.background = "";
         pp.style.background = "";
@@ -1102,8 +1103,10 @@ function toggle_GS() {
         pvs.style.background = "";
         palt.style.background = "";
 		pcl.style.background = "";
+		ppitch.style.background = "";
 
         AP_GS = true;
+		AP_Pitch=false;
 		AP_Climb = false;
         AP_Altitude = false
 		AP_Vspeed = false;
