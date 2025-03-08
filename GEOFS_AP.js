@@ -114,10 +114,12 @@ function control_load_factor(asked_LF) {
 
 }
 CI = 0
-    prev_err = 0
+prev_err = 0
+
 function control_roll(asked_roll) {
 
     roll = geofs.animation.values.aroll
+	if (takeoff){asked_roll=Math.max(-10,Math.min(10,asked_roll))}
 	prol.innerHTML = "ROLL " + Math.round(asked_roll*10)/10;
         err = asked_roll + roll
 
@@ -499,11 +501,12 @@ pKi2=1
 pKd2=.02
 vpitch_limit=3 // 3 deg per second max 
 vpitch_limit_catch=.5 // .5 deg per second max 
-
+takeoff=false
 function control_pitch(ask_pitch) {
-	takeoff = geofs.animation.values.groundContact || !AP_Land && (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet) < 50
 	if (takeoff) {
 		pitch_err = 10 + pitch // limit pitch on takeoff to avoid tail strike
+		
+		controls.rawPitch=Math.max(-.5,Math.min(.5,controls.rawPitch))
 		//pitch_err>0 tow low pitch, must increase
 	} else {
 		pitch_err=ask_pitch+pitch
@@ -728,7 +731,8 @@ function AP_Pitch_roll() {
 		{
 			mach_factor=Math.E**(attenuation_factor*(1-mach))/Math.E**(attenuation_factor*(1-0.5))
 		}
-		
+		takeoff = geofs.animation.values.groundContact || !AP_Land && (geofs.animation.values.altitude - geofs.animation.values.groundElevationFeet) < 50
+	
 
 
 
