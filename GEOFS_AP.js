@@ -649,6 +649,9 @@ function control_land() {
 	
 
 	if (!geofs.animation.values.groundContact && height < 20 + 10) {
+
+
+		if (!AP_Vspeed){toggle_VS()}
 		pl.innerHTML = "LAND " + Math.round(height)+ " FLARE"
 		tgt_vs = 0
 
