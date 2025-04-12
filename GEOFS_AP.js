@@ -963,6 +963,7 @@ function toggle_AP() {
 
     } else {
         div.style.background = "green";
+        geofs.aircraft.instance.controllers.roll.recenter=false
         AP_is_ON = 1
             AP_Pitch_roll();
         apctl.style.display = "BLOCK"
