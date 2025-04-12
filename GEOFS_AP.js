@@ -527,7 +527,16 @@ function control_pitch(ask_pitch) {
 	}
 	else if (Math.abs(vpitch/vpitch_limit)>1)
 	{
-		controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor
+		if (Math.abs(pitch_err)>10){
+			controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor*Math.abs(vpitch/vpitch_limit)*3
+		}
+		
+		else
+			
+		{
+			controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor*Math.abs(vpitch/vpitch_limit)
+		}
+		
 		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "V"
 
 	}
@@ -580,7 +589,7 @@ function find_ILS() {
 }
 nav = null
     nav_error = 0
-    nki = 0.00002
+    nki = 0.00001
     nCI = 0
 old_delta=0
 function control_nav() {
