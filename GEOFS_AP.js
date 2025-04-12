@@ -580,7 +580,7 @@ function find_ILS() {
 }
 nav = null
     nav_error = 0
-    nki = 0.00001
+    nki = 0.00002
     nCI = 0
 old_delta=0
 function control_nav() {
