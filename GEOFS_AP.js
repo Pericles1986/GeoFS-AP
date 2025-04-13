@@ -326,7 +326,7 @@ function climb() {
             pcl.style.background = "orange";
         cCI = -pitch
 		min_pitch = -25;
-		max_pitch = -pitch;
+		max_pitch = 25;
 		
     } 	
 	
@@ -502,7 +502,7 @@ pKd2=.02
 vpitch_limit=3 // 3 deg per second max 
 vpitch_limit_catch=.5 // .5 deg per second max 
 takeoff=false
-function control_pitch(ask_pitch) {
+function control_pitch_old2(ask_pitch) {
 	if (takeoff) {
 		pitch_err = 10 + pitch // limit pitch on takeoff to avoid tail strike
 		
@@ -516,7 +516,7 @@ function control_pitch(ask_pitch) {
 	if (gload>maxg)
 	{
 		controls.rawPitch-=.01
-		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "G"
+		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "G" // glimit
 
 	}
 	else if (gload<ming)
@@ -537,7 +537,7 @@ function control_pitch(ask_pitch) {
 			controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor*Math.abs(vpitch/vpitch_limit)
 		}
 		
-		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "V"
+		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "V" // pitch rate limit
 
 	}
 	else
@@ -545,10 +545,12 @@ function control_pitch(ask_pitch) {
 		if (Math.abs(pitch_err)>2){
 			
 			controls.rawPitch+=.005*Math.sign(pitch_err)*mach_factor
+			pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "S" //smooth or normal mode
 			
 			if (pitch_err*vpitch>=0)
 			{
 				controls.rawPitch+=.05*Math.sign(pitch_err)*mach_factor
+				pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "L" // runaway 
 			
 			}
 		
@@ -557,20 +559,36 @@ function control_pitch(ask_pitch) {
 		else
 		{
 			controls.rawPitch+=.005*pitch_err/2*mach_factor*pKi2
-			if (Math.abs(vpitch)>.5)
+			if (Math.abs(vpitch)>1.5)
 			{
 				controls.rawPitch+=.01*Math.sign(vpitch)*mach_factor
+				pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10 + "N" //normal
 				
 			}
 		}
-		pp.innerHTML = "PITCH " +Math.round(10 * ask_pitch)/10
+		
 		
 
 	}
     
 }
 
-
+function control_pitch(ask_pitch) {
+	if (takeoff) {
+		pitch_err = 10 + pitch // limit pitch on takeoff to avoid tail strike
+		
+		controls.rawPitch=Math.max(-.5,Math.min(.5,controls.rawPitch))
+		//pitch_err>0 tow low pitch, must increase
+	} else {
+		pitch_err=ask_pitch+pitch
+	}
+	
+	vpitch_tgt=Math.max(-vpitch_limit,Math.min(vpitch_limit,pitch_err/10))
+	
+	
+	controls.rawPitch+=(vpitch_tgt+vpitch)/1000*mach_factor
+	
+}
 last_checked_freq = 0
     thisnav = ""
 function find_ILS() {
@@ -624,8 +642,14 @@ function control_gs() {
     gs_dev = geofs.animation.values.NAVGlideAngleDeviation*geofs.animation.values.NAVDistance
 	
 	d_gs_dev=(gs_dev-prev_gs_dev)
-	
+	if (Math.abs(gs_dev)>50){
 	future_dev=(gs_dev+d_gs_dev/dt*5)
+		
+	}
+	else 
+	{
+		future_dev=(gs_dev+d_gs_dev/dt*1)
+	}
 	
 	gsCI += future_dev * gski
 
