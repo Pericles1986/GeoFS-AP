@@ -499,7 +499,7 @@ function control_pitch_old(ask_pitch) {
 
 pKi2=1
 pKd2=.02
-vpitch_limit=3 // 3 deg per second max 
+vpitch_limit=10 // 3 deg per second max 
 vpitch_limit_catch=.5 // .5 deg per second max 
 takeoff=false
 function control_pitch_old2(ask_pitch) {
@@ -583,10 +583,10 @@ function control_pitch(ask_pitch) {
 		pitch_err=ask_pitch+pitch
 	}
 	
-	vpitch_tgt=Math.max(-vpitch_limit,Math.min(vpitch_limit,pitch_err/10))
+	vpitch_tgt=Math.max(-vpitch_limit,Math.min(vpitch_limit,pitch_err/3))
 	
 	
-	controls.rawPitch+=(vpitch_tgt+vpitch)/1000*mach_factor
+	controls.rawPitch+=(vpitch_tgt+vpitch)/200*mach_factor*mach_factor
 	
 }
 last_checked_freq = 0
